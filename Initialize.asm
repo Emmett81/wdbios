@@ -26,6 +26,12 @@
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+;--------------------------------------------------------------------------------
+; Fixed disk BIOS entry point                                                   :
+;--------------------------------------------------------------------------------
+; This entry point gets called by the system BIOS. Here we initialize the hard  :
+; drive and set up our interrupt vectors accordingly.                           :
+;--------------------------------------------------------------------------------
 ENTRYPOINT:
 	XOR	AX,AX
 	MOV	DS,AX				; DS = 0000h
@@ -42,14 +48,14 @@ ENTRYPOINT:
 ; drives we really have before proceeding. We will update
 ; the drive count accordingly.
 ;--------------------------------------------------------------------------
-	PUSH	AX				; Save our code segment for later
+	PUSH	AX				; Save controller info for later
 	MOV	AL,[TOTAL_FIXED_DISKS]		; Get number of fixed disks from BIOS
 	CMP	AL,2				; Less than 2 drives present?
-	JL	LAB_c800_00fd			; Assume working drives and configure
+	JL	SET_SECOND_CONTROLLER		; Assume working drives and configure
 						; us as second controller
 
 	XOR	AX,AX				; Counter for number of HDDs
-	MOV	DX,80h				; Work with first HDDD
+	MOV	DX,80h				; Work with first HDDs
 
 CHECK_DRIVE:
 	PUSH	AX
@@ -66,11 +72,11 @@ NEXT_DRIVE:
 	TEST	DL,1				; Finished with second drive?
 	JNZ	CHECK_DRIVE			; No, test second drive
 	CMP	AL,2				; Do we have 2 working drives?
-	JZ	LAB_c800_00fd			; Yes, skip BIOS parameter update
+	JZ	SET_SECOND_CONTROLLER		; Yes, skip BIOS parameter update
 	MOV	[TOTAL_FIXED_DISKS],AL		; Update BIOS HDD count
 
-LAB_c800_00fd:
-	POP	AX				; Restore our code segment
+SET_SECOND_CONTROLLER:
+	POP	AX				; Restore controller info
 	MOV	AL,4				; Set as second controller
 
 ;--------------------------------------------------------------------------
@@ -91,26 +97,27 @@ INSTALL_BIOS:
 	JZ	SET_IRQ2_HANDLER		; If S1-7 is 0 (closed), use IRQ 2
 	MOV	WORD [INT_0DH_IRQ5_OFFSET],IRQ_HANDLER
 	MOV	[INT_0DH_IRQ5_SEGMENT],CS
-	JMP	SHORT LAB_c800_0124
+	JMP	SHORT SET_DISK_VECTORS
 
 SET_IRQ2_HANDLER:
 	MOV	WORD [INT_0AH_IRQ2_OFFSET],IRQ_HANDLER
 	MOV	[INT_0AH_IRQ2_SEGMENT],CS
 
-LAB_c800_0124:
+SET_DISK_VECTORS:
 	LES	BX,[INT_13H_VECTOR]		; BX=INT 13h offset, ES=INT 13h segment
 	MOV	CX,[INT_40H_OFFSET]
 	OR	CX,[INT_40H_SEGMENT]		; Check if INT 40h is all zeroes
-	JNZ	SECOND_CONTROLLER_INIT		; Non-zero -- Don't relocate
+	JNZ	SECOND_CONTROLLER_INIT		; Non-zero -- Don't use INT 40h
+						; but use INT 47h instead
 
 FIRST_CONTROLLER_INIT:
-	MOV	[INT_40H_OFFSET],BX		; Set INT 40h to old INT 13h vector
+	MOV	[INT_40H_OFFSET],BX		; Relocate old INT 13h vector into INT 40h
 	MOV	[INT_40H_SEGMENT],ES
 
-	MOV	WORD [INT_19H_OFFSET],BOOTSTRAP_HANDLER
+	MOV	WORD [INT_19H_OFFSET],BOOTSTRAP_HANDLER ; Set our INT 19h handler
 	MOV	[INT_19H_SEGMENT],CS
 
-	MOV	WORD [INT_13H_OFFSET],DISK_HANDLER
+	MOV	WORD [INT_13H_OFFSET],DISK_HANDLER	; Set our INT 13h handler
 	MOV	[INT_13H_SEGMENT],CS
 
 	MOV	WORD [INT_41H_OFFSET],ROMVARS.driveType0Params
@@ -120,7 +127,7 @@ FIRST_CONTROLLER_INIT:
 	
 LAB_c800_015f:
 	MOV	[INT_41H_SEGMENT],CS		; Finish setting up INT 41h
-	MOV	BX,FIRST_DISK_AREA	; Fixed disk data - first controller
+	MOV	BX,FIRST_DISK_AREA		; Fixed disk data - first controller
 	JMP	SHORT LAB_c800_019c
 	NOP
 

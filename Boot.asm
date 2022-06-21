@@ -26,6 +26,19 @@
 ; OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+;--------------------------------------------------------------------------------
+; INT 19H Handler                                                               :
+;--------------------------------------------------------------------------------
+; This interrupt gets called when the system is bootstraping the OS.            :
+;                                                                               :
+; We will try to boot the first floppy, then each available hard drive. For     :
+; floppy drive we will retry up to 3 times, but a timeout error is fatal. For   :
+; hard drives any error is fatal. Boot sectors in hard drives are required to   :
+; have AA55h as the last bytes to be considered valid.                          :
+;                                                                               :
+; If we're unable to bootstrap from either floppy drive or hard drive, we will  :
+; call Int 18h to invoke the resident BASIC (in IBM BIOS).                      :
+;--------------------------------------------------------------------------------
 BOOTSTRAP_HANDLER:
 	XOR	AX,AX
 	MOV	DS,AX				; DS=0000H
@@ -35,15 +48,15 @@ BOOTSTRAP_HANDLER:
 
 TRY_BOOT_FLOPPY:
 	MOV	AX,0				; Reset disk system (for floppy)
-	INT	40H
+	INT	40H				; Relocated disk handler
 	JC	FLOPPY_FAILURE			; Error - possibly retry
 
-	MOV	BX,BOOT_SECTOR_OFFSET	; Offset to load boot sector into
+	MOV	BX,BOOT_SECTOR_OFFSET		; Offset to load boot sector into
 	MOV	AX,0201H			; Read 1 sector into memory
-	PUSH	CX
+	PUSH	CX				; Save retry counter
 	MOV	CX,1				; Cylinder 0, sector 1
 	INT	40H				; Load it
-	POP	CX
+	POP	CX				; Restore retry counter
 	JNC	JUMP_BOOT_SECTOR		; Jump to it on success
 
 FLOPPY_FAILURE:
@@ -53,7 +66,7 @@ FLOPPY_FAILURE:
 
 SETUP_BOOT_HARD_DRIVE:
 	MOV	AX,0				; Reset disk system (again)
-	INT	40H
+	INT	40H				; Relocated disk handler
 	MOV	DL,80H				; First hard drive
 	MOV	CL,[TOTAL_FIXED_DISKS]		; Numer of hard disks available
 	AND	CL,CL				; Check if none
