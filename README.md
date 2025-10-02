@@ -2,8 +2,7 @@
 
 ## Overview
 
-This is a modified version of the Western Digital WD1002A-WX1 controller BIOS ROM that I added
-to my custom bios rom. 
+This is a modified version of the Western Digital WD1002A-WX1 controller rom.
 
 ## Modifications
 
@@ -12,13 +11,15 @@ to my custom bios rom.
 The ROM decides if it's the primary or secondary controller based on where the ROM is loaded from.
 I changed the segment checks so it acts as the primary controller when loaded from segment **F000H**.
 
+This was needed because I disabled the rom on the card and added it to my custom system bios.
+
 ### Modified IRQ Selection Logic
 
 **The IRQ selection logic has been reversed from the original WD ROM behavior.**
 
 I wanted to use IRQ5 for something else and IRQ 2 is not in use by VGA in my system.
 My card is however hardwired for IRQ5. I rewired it for IRQ2 but S1-7 jumper on my 
-card has no effect on the configuration register. So reversed the logic.
+card has no effect on the configuration register. So I reversed the logic.
 
 #### Original Behavior:
 - S1-7 jumper **CLOSED** → IRQ 2
