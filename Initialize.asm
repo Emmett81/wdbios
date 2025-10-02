@@ -38,11 +38,11 @@ ENTRYPOINT:
 	CLI					; Interrupts disabled
 	MOV	AX,CS
 	MOV	AL,0				; First controller I/O offset
-	CMP	AH,0C8h				; Check for CS=C800h
+	CMP	AH,0F0h				; Check for CS=F000h
 	JZ	INSTALL_BIOS			; Yes, setup as first controller
 
 ;--------------------------------------------------------------------------
-; At this point we know that we're not running in C800h.
+; At this point we know that we're not running in F000h.
 ; This means that we may have another hard disk controller
 ; in the system. Thus, we need to check how many working 
 ; drives we really have before proceeding. We will update
@@ -81,7 +81,7 @@ SET_SECOND_CONTROLLER:
 
 ;--------------------------------------------------------------------------
 ; This card has 4 bytes of I/O starting at 320h or 324h.
-; These I/O values come with a BIOS address of C800h:0000h
+; These I/O values come with a BIOS address of F000h:0000h
 ; or CA00h(?).
 ; Based on our CS, we have determined which offset from
 ; 320h to use: either 00h or 04h. This is contained in AL.
@@ -132,7 +132,7 @@ LAB_c800_015f:
 	NOP
 
 SECOND_CONTROLLER_INIT:
-	CMP	AL,0C8H				; Just in case, check if we're the
+	CMP	AL,0F0H				; Just in case, check if we're the
 						; first controller
 	JZ	FIRST_CONTROLLER_INIT		; We are -- go to proper init
 	MOV	[INT_47H_OFFSET],BX		; Save old INT 13h vector to 2nd controller's chain

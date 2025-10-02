@@ -942,7 +942,7 @@ LAB_c800_09cd:
 	MOV	CX,BX
 	PUSH	CS
 	POP	BX
-	CMP	BH,0C8H
+	CMP	BH,0F0H
 	LES	BX,[INT_41H_VECTOR]
 	JZ	LAB_c800_09ee
 	MOV	BX,43H
@@ -990,7 +990,7 @@ FUN_c800_0a0f:
 READ_HARDWARE_CONFIG:
 	PUSH	CS
 	POP	DX				; DX has CS value
-	CMP	DH,0C8H				; Check if CS starts with C8H
+	CMP	DH,0F0H				; Check if CS starts with F0H
 	MOV	DX,0322H			; Base I/O address
 	JZ	DO_READ_HARDWARE_CONFIG		; Yes, go straight to reading from hardware
 	ADD	DX,BYTE 4			; Add offset for second card
@@ -1002,7 +1002,7 @@ DO_READ_HARDWARE_CONFIG:
 GET_STATUS_ADDRESS:
 	PUSH	CS
 	POP	DX
-	CMP	DH,0C8H				; Check for C8xx
+	CMP	DH,0F0H				; Check for F0xx
 	MOV	DX,0321H			; This is status address for first controller
 	JZ	RETURN_STATUS_ADDRESS		; Don't add for first controller
 	ADD	DX,BYTE 4			; Add for second controller
@@ -1013,7 +1013,7 @@ RETURN_STATUS_ADDRESS:
 GET_MASK_REGISTER_ADDR:
 	PUSH	CS
 	POP	DX
-	CMP	DH,0C8H				; Check for C8xx
+	CMP	DH,0F0H				; Check for F0xx
 	MOV	DX,0323H			; DMA and IRQ mask register for first controller
 	JZ	LAB_c800_0a47			; Don't add for first controller
 	ADD	DX,BYTE 4			; Add for second controller
@@ -1201,7 +1201,7 @@ LAB_c800_0b98:
 	PUSH	CS
 	POP	AX
 	MOV	BX,0476H
-	CMP	AH,0C8H
+	CMP	AH,0F0H
 	JZ	LAB_c800_0bd4
 	MOV	BX,0122H
 LAB_c800_0bd4:

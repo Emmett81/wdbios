@@ -164,7 +164,7 @@ FUN_c800_039e:
 	MOV	[SAVED_INT13H_CX],CX
 	PUSH	CS
 	POP	CX
-	CMP	CH,0C8H				; Check for C8xx
+	CMP	CH,0F0H				; Check for F0xx
 	MOV	CH,0
 	JZ	LAB_c800_03b8			; First controller - go jump
 
