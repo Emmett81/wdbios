@@ -118,12 +118,12 @@ LAB_c800_035d:
 	CALL	READ_HARDWARE_CONFIG
 	AND	AL,40H				; Check for IRQ bit
 	IN	AL,21H				; Read OCW1 from PIC
-	JNZ	MASK_IRQ5			; If set to IRQ 5, go for it
-	OR	AL,4				; Mask IRQ 2
+	JNZ	MASK_IRQ2			; If S1-7 open (IRQ 2), go mask IRQ 2
+	OR	AL,20H				; Mask IRQ 5 (S1-7 closed)
 	JMP	SHORT DO_MASK_IRQ
 
-MASK_IRQ5:
-	OR	AL,20H				; Mask IRQ 5
+MASK_IRQ2:
+	OR	AL,4				; Mask IRQ 2
 
 DO_MASK_IRQ:
 	OUT	21H,AL				; Update PIC OCW1

@@ -36,12 +36,12 @@ IRQ_HANDLER:
 	CALL	READ_HARDWARE_CONFIG
 	AND	AL,40H				; Check if set for IRQ 2 or 5
 	IN	AL,21H				; Get OCW1 from PIC
-	JNZ	IRQ2_MASK			; Go mask IRQ 2
-	OR	AL,4				; Mask IRQ 5
+	JNZ	IRQ5_MASK			; If S1-7 open (IRQ 2), go mask IRQ 5
+	OR	AL,20h				; Mask IRQ 2 (S1-7 closed, using IRQ 5)
 	JMP	SHORT LAB_c800_02e7
 
-IRQ2_MASK:
-	OR	AL,20h				; IRQ 2 masked
+IRQ5_MASK:
+	OR	AL,4				; Mask IRQ 5
 
 LAB_c800_02e7:
 	OUT	21H,AL				; Write PIC OCW1

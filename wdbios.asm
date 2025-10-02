@@ -491,11 +491,11 @@ LAB_c800_0710:
 	AND	AL,40H				; Check for bit 6 set
 	IN	AL,21H				; Read OCW1
 	JNZ	LAB_c800_071e			; Jump if set
-	AND	AL,0FBH				; Disable IRQ 2
+	AND	AL,0DFH				; Disable IRQ 5
 	JMP	SHORT LAB_c800_0720
 
 LAB_c800_071e:
-	AND	AL,0DFH				; Disable IRQ 5
+	AND	AL,0FBH				; Disable IRQ 2
 
 LAB_c800_0720:
 	OUT	21H,AL				; Write PIC OCW1
