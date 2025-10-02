@@ -59,10 +59,10 @@
 	AT	ROMVARS.driveType2Params+DRVPARAMS.bFormattingTimeout,	db	2
 	AT	ROMVARS.driveType2Params+DRVPARAMS.rgbReserved,		db	5 dup 0
 
-	AT	ROMVARS.driveType3Params+DRVPARAMS.wCylinder,		dw	615
-	AT	ROMVARS.driveType3Params+DRVPARAMS.bHeads,		db	4
-	AT	ROMVARS.driveType3Params+DRVPARAMS.wReducedWrite,	dw	450
-	AT	ROMVARS.driveType3Params+DRVPARAMS.wWritePrecomp,	dw	450
+	AT	ROMVARS.driveType3Params+DRVPARAMS.wCylinder,		dw	820
+	AT	ROMVARS.driveType3Params+DRVPARAMS.bHeads,		db	6
+	AT	ROMVARS.driveType3Params+DRVPARAMS.wReducedWrite,	dw	821
+	AT	ROMVARS.driveType3Params+DRVPARAMS.wWritePrecomp,	dw	821
 	AT	ROMVARS.driveType3Params+DRVPARAMS.bMaxEccBurst,	db	11
 	AT	ROMVARS.driveType3Params+DRVPARAMS.bControlByte,	db	5	; 70ms step
 	AT	ROMVARS.driveType3Params+DRVPARAMS.bStandardTimeout,	db	103
